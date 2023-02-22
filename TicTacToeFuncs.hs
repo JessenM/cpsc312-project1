@@ -30,3 +30,12 @@ getSubBoardWinStatus sb =
             if checkFull sb
             then Draw
             else NoneYet
+
+
+-- get subboard with given "index" (assumes index is in [1,9])
+getIndexedSubBoard :: SuperBoard -> Integer -> SubBoard
+getIndexedSubBoard spb index = ith whichCol (ith whichRow spb)
+ where whichRow = div (index - 1) 3 + 1
+       whichCol = mod (index - 1) 3 + 1
+       ith 1 (h:t) = h
+       ith n (h:t) = ith (n - 1) t
