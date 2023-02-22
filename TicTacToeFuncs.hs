@@ -3,16 +3,16 @@ module TicTacToeFuncs where
 import TicTacToeTypes
 
 -- check each row of sb for three-in-a-row of type c (win condition)
-checkRows :: SubBoard -> Cell -> Bool
-checkRows sb c = foldl (\ v an -> v || ((sb !! 1 !! an == c) && (sb !! 2 !! an == c) && (sb !! 3 !! an == c))) False [1..3]
+checkCols :: SubBoard -> Cell -> Bool
+checkCols sb c = foldl (\ v an -> v || ((sb !! 1 !! an == c) && (sb !! 2 !! an == c) && (sb !! 3 !! an == c))) False [0..2]
 
 -- check each column of sb for three-in-a-row of type c (win condition)
-checkCols :: SubBoard -> Cell -> Bool
-checkCols sb c = foldl (\ v an -> v || ((sb !! an !! 1 == c) && (sb !! an !! 2 == c) && (sb !! an !! 3 == c))) False [1..3]
+checkRows :: SubBoard -> Cell -> Bool
+checkRows sb c = foldl (\ v an -> v || ((sb !! an !! 1 == c) && (sb !! an !! 2 == c) && (sb !! an !! 3 == c))) False [0..2]
 
 -- check each diagonal of sb for three-in-a-row of type c (win condition)
 checkDiags :: SubBoard -> Cell -> Bool
-checkDiags sb c = foldl (\ v an -> v || ((sb !! (2 * an - 1) !! 1 == c) && (sb !! 2 !! 2 == c) && (sb !! (5 - 2 * an) !! 3 == c))) False [1, 2]
+checkDiags sb c = foldl (\ v an -> v || ((sb !! (2 * an) !! 0 == c) && (sb !! 1 !! 1 == c) && (sb !! (2 * an) !! 2 == c))) False [0, 1]
 
 -- check if board is full
 checkFull :: SubBoard -> Bool
