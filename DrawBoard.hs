@@ -95,7 +95,7 @@ makeListSubBoardSB strSB n = [(makeStringSubBoardRowSB (makeListSubBoardRowSB st
 makeStringSubBoardSB :: [[Char]] -> [Char]
 makeStringSubBoardSB lststr = intercalate "\n--+---+-- || --+---+-- || --+---+-- \n" lststr
 
--- makes list of superboard-rows ready to be intercalated with sepators (also labelled
+-- makes list of superboard-rows ready to be intercalated with sepators (also labelled)
 makeListRowSB :: [[[[Char]]]] -> [[Char]]
 makeListRowSB strSB = [(makeStringSubBoardSB (makeListSubBoardSB strSB 1))++"   A", (makeStringSubBoardSB (makeListSubBoardSB strSB 2))++"   B", (makeStringSubBoardSB (makeListSubBoardSB strSB 3))++"   C"]
 
