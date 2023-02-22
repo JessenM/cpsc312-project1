@@ -11,9 +11,9 @@ data Cell = X
 
 -- a subboard is just a list of lists (rows) of cells
 --ex.
--- subBoard1 = [[X    , Empty,   O  ]
---                [O    , Empty, Emtpy]
---               [Empty, X    ,   O   ]]
+-- subBoard1 = [[X    , Empty,   O  ]      --row1
+--               [O    , Empty, Emtpy]     --row2
+--               [Empty, X    ,   O   ]]   --row3
 
 type SubBoard = [[Cell]]
 
@@ -38,8 +38,8 @@ type Player = State -> Action
 
 
 -- an action is either:
--- SubBoardAction - coordinate on subboard to make move
--- SuperBoardAction - choosing a subboard from the superboard (one of the 9)
+-- SubBoardAction - coordinate on subboard to make move, (ColumnNumber, RowNumber), INDEX ([0..2],[0..2])
+-- SuperBoardAction - choosing a subboard from the superboard (one of the 9), INDEX [0..8]
 data Action = SubBoardAction (Integer, Integer)
               |SuperBoardAction Integer
 
