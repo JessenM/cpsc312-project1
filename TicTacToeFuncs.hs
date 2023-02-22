@@ -16,7 +16,7 @@ checkDiags sb c = foldl (\ v an -> v || ((sb !! (2 * an) !! 0 == c) && (sb !! 1 
 
 -- check if board is full
 checkFull :: SubBoard -> Bool
-checkFull sb = foldl (\ v an -> v && (sb !! (an `mod` 3 + 1) !! (an `div` 3 + 1)) == Empty) True [0..8]
+checkFull sb = foldl (\ v an -> v || (sb !! (an `mod` 3) !! (an `div` 3)) == Empty) False [0..8]
 
 -- check if board has been won
 getSubBoardWinStatus :: SubBoard -> WinStatus
