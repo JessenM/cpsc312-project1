@@ -69,7 +69,17 @@ getIndexedSubBoard spb index = ith whichCol (ith whichRow spb)
        ith 1 (h:t) = h
        ith n (h:t) = ith (n - 1) t
 
-
+-- insert given cell value into subboard at given coordinates (0-based indexing)
+fillCell :: SubBoard -> Cell -> (Integer, Integer) -> SubBoard
+fillCell board newCell (coln, rown) = fillCelln board 0
+ where fillRown row n
+        | row == [] = []
+        | n == coln = newCell : (tail row)
+        | otherwise = (head row):(fillRown (tail row) (n + 1))
+       fillCelln board n
+        | board == [] = []
+        | n == rown = (fillRown (head board) 0):(tail board)
+        | otherwise = (head board):(fillCelln (tail board) (n + 1))
 
 -- returns list of valid actions on given superboard
 -- int represents activeboardindex, if negative it means a SuperBoardAction is needed
@@ -93,7 +103,7 @@ simplePlayer (State superBoard activesubboardindex symbol)
 
 -- first guard checks to see if active subboard is full or won, if not then computes an action on that subboard
 -- otherwise, computes an action that chooses a new subboard
-					
+
 -- current implementation does not use a negative activesubboardindex, checks to see if full or won
 
 
@@ -159,10 +169,10 @@ processNewBoard2 supboard =
                         Xwin: (replaceRow sup row2 (i + 1))
                     else if marker == Owin then
                         Owin : (replaceRow sup row2 (i + 1))
-					else if marker == Draw then
+                    else if marker == Draw then
                         Draw : (replaceRow sup row2 (i + 1))
                     else NoneYet : (replaceRow sup row2 (i + 1))
-					
+
 
 --Testing Boards
 
@@ -170,12 +180,12 @@ subBoard15 :: SubBoard
 subBoard15 = [[X, X, X], 
             [X, O, X], 
             [O, X, Empty]]
-            
-            
+
+
 subBoard16 = [[O, X, X], 
             [X, Empty, X], 
             [Empty, X, Empty]]
-            
+
 subBoard17 = [[X, X, O], 
             [O, X, X], 
             [O, O, O]]
@@ -207,13 +217,13 @@ superBoard12 = [[emptysubBoard11, subBoard16, subBoard15],
 
 superBoardDraw :: SuperBoard
 superBoardDraw = [[subBoard18, subBoard18, subBoard18],
-				  [subBoard18, subBoard18, subBoard18],
-				  [subBoard18, subBoard18, subBoard18]]
+                  [subBoard18, subBoard18, subBoard18],
+                  [subBoard18, subBoard18, subBoard18]]
 
 superBoardNonFillDraw :: SuperBoard
 superBoardNonFillDraw = [[subBoard15, subBoard19, subBoard15],
-				  [subBoard19, subBoard15, subBoard15],
-				  [subBoard19, subBoard15, subBoard19]]
+                  [subBoard19, subBoard15, subBoard15],
+                  [subBoard19, subBoard15, subBoard19]]
 
 superBoard13 :: SuperBoard
 superBoard13 = [[subBoard15, subBoard16, subBoard15], 
