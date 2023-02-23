@@ -43,6 +43,10 @@ type Player = State -> Action
 data Action = SubBoardAction (Integer, Integer)
               |SuperBoardAction Integer
 
+instance Show Action where
+	show (SubBoardAction (coln, rown)) = "Action at: col: "++(show(coln+1))++" row: "++(show(rown+1)) -- use +1 because index starts at 0, but our GUI coordinates start at 1
+	show (SuperBoardAction boardnumber) = "Action at board: "++(show (boardnumber+1)) -- +1 because index starts at 0
+
 -- Result is either EndOfGame with winning symbol (string, 'X', 'O', unless tie, then nothing?), or ContinueGame with an updated state 
 data Result = EndOfGame String State
             |ContinueGame State
