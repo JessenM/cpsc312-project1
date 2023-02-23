@@ -39,16 +39,16 @@ getIndexedSubBoard spb index = ith whichCol (ith whichRow spb)
        whichCol = mod (index - 1) 3 + 1
        ith 1 (h:t) = h
        ith n (h:t) = ith (n - 1) t
-	   
+
 -- returns list of valid actions on given superboard
 -- int represents activeboardindex, if negative it means a SuperBoardAction is needed
 getValidActions :: SuperBoard -> Integer -> [Action]
 getValidActions superBoard activesubboardindex = 
-	if activesubboardindex < 0 then
-		[SuperBoardAction i | (i,subboard)<-(zip [0..] (concat superBoard)), (getSubBoardWinStatus subboard == NoneYet)]
-	else
-		let activesubboard = (getIndexedSubBoard superBoard (activesubboardindex+1)) in
-			[SubBoardAction (rem n 3,quot n 3)| (n, cell)<-(zip [0..] (concat activesubboard)), cell==Empty]
+    if activesubboardindex < 0 then
+        [SuperBoardAction i | (i,subboard)<-(zip [0..] (concat superBoard)), (getSubBoardWinStatus subboard == NoneYet)]
+    else
+        let activesubboard = (getIndexedSubBoard superBoard (activesubboardindex+1)) in
+            [SubBoardAction (rem n 3,quot n 3)| (n, cell)<-(zip [0..] (concat activesubboard)), cell==Empty]
 
 
 simplePlayer :: Player
@@ -57,8 +57,8 @@ simplePlayer :: Player
 -- if choosing a cell on subboard, it chooses the first cell
 -- if activeSubBoard is full or won/draw then computes a superBoard action
 simplePlayer (State superBoard activesubboardindex symbol) 
-	| let activeSubBoard = getIndexedSubBoard superBoard (activesubboardindex+1), not (checkFull(activeSubBoard)) && ((getSubBoardWinStatus activeSubBoard) == NoneYet) = head(getValidActions superBoard activesubboardindex)
-	| otherwise = head(getValidActions superBoard (-1))
+    | let activeSubBoard = getIndexedSubBoard superBoard (activesubboardindex+1), not (checkFull(activeSubBoard)) && ((getSubBoardWinStatus activeSubBoard) == NoneYet) = head(getValidActions superBoard activesubboardindex)
+    | otherwise = head(getValidActions superBoard (-1))
 
 -- first guard checks to see if active subboard is full or won, if not then computes an action on that subboard
 -- otherwise, computes an action that chooses a new subboard
@@ -72,12 +72,12 @@ subBoard5 :: SubBoard
 subBoard5 = [[X, X, X], 
             [X, O, X], 
             [O, X, Empty]]
-			
-			
+
+
 subBoard6 = [[O, X, X], 
             [X, Empty, X], 
             [Empty, X, Empty]]
-			
+
 subBoard7 = [[X, X, O], 
             [O, X, X], 
             [O, O, O]]
@@ -85,7 +85,7 @@ subBoard7 = [[X, X, O],
 subBoard8 = [[O, O, X], 
             [X, X, O], 
             [O, X, O]]
-            
+
 emptySubBoard1 :: SubBoard
 emptySubBoard1 = [[Empty, Empty, Empty], 
                  [Empty, Empty, Empty], 
@@ -93,8 +93,8 @@ emptySubBoard1 = [[Empty, Empty, Empty],
 
 superBoard1 :: SuperBoard
 superBoard1 = [[emptySubBoard1, subBoard6, emptySubBoard1], 
-			   [subBoard7, emptySubBoard, subBoard7], 
-               [subBoard8, emptySubBoard1, subBoard8]]
+                [subBoard7, emptySubBoard, subBoard7], 
+                [subBoard8, emptySubBoard1, subBoard8]]
 
 -- TESTs
 -- ghci> simplePlayer (State superBoard1 8 "X")
