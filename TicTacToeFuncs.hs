@@ -32,6 +32,34 @@ getSubBoardWinStatus sb =
             then Draw
             else NoneYet
 
+-- check if board has been won
+getSuperBoardWinStatus :: [[WinStatus]] -> WinStatus
+getSuperBoardWinStatus wslst = 
+    if (checkWinStatusRows wslst  Xwin) || (checkWinStatusCols wslst Xwin) || (checkWinStatusDiags wslst Xwin)
+    then Xwin
+    else
+        if (checkWinStatusRows wslst Owin) || (checkWinStatusCols wslst Owin) || (checkWinStatusDiags wslst Owin)
+        then Owin
+        else
+            if checkWinStatusFull wslst
+            then Draw
+            else NoneYet
+
+-- check each row of sb for three-in-a-row of type c (win condition)
+checkWinStatusCols :: [[WinStatus]] -> WinStatus -> Bool
+checkWinStatusCols sb c = foldl (\ v an -> v || ((sb !! 0 !! an == c) && (sb !! 1 !! an == c) && (sb !! 2!! an == c))) False [0..2]
+
+-- check each column of sb for three-in-a-row of type c (win condition)
+checkWinStatusRows :: [[WinStatus]] -> WinStatus -> Bool
+checkWinStatusRows sb c = foldl (\ v an -> v || ((sb !! an !! 0 == c) && (sb !! an !! 1 == c) && (sb !! an !! 2 == c))) False [0..2]
+
+-- check each diagonal of sb for three-in-a-row of type c (win condition)
+checkWinStatusDiags :: [[WinStatus]] -> WinStatus -> Bool
+checkWinStatusDiags sb c = foldl (\ v an -> v || ((sb !! (2 * an) !! 0 == c) && (sb !! 1 !! 1 == c) && (sb !! (2*(1-an)) !! (2) == c))) False [0, 1]
+
+-- check if board is full
+checkWinStatusFull :: [[WinStatus]] -> Bool
+checkWinStatusFull sb = foldl (\ v an -> v && (sb !! (an `mod` 3) !! (an `div` 3)) /= NoneYet) True [0..8]
 
 -- get subboard with given "index" (assumes index is in [1,9])
 getIndexedSubBoard :: SuperBoard -> Integer -> SubBoard
@@ -65,6 +93,9 @@ simplePlayer (State superBoard activesubboardindex symbol)
 
 -- first guard checks to see if active subboard is full or won, if not then computes an action on that subboard
 -- otherwise, computes an action that chooses a new subboard
+					
+-- current implementation does not use a negative activesubboardindex, checks to see if full or won
+
 
 -- prints out current board
 -- figures out if someone has won. if yes, announce the victory. if no, keep playing
@@ -98,8 +129,40 @@ processNewBoard supboard =
                         O : (replaceRow sup row2 (i + 1))
                     else Empty : (replaceRow sup row2 (i + 1))
 
-
--- current implementation does not use a negative activesubboardindex, checks to see if full or won
+-- prints out current board
+-- figures out if someone has won. if yes, announce the victory. if no, keep playing
+-- using integers as return values as temporary placeholders
+processNewBoard2 :: SuperBoard -> IO Integer
+processNewBoard2 supboard =
+    let winStat = getSuperBoardWinStatus (reduceBoard supboard emptySubBoard 0) in
+    do
+        let boardOut = terminalDrawSuperBoard supboard
+        if winStat == Xwin 
+            then
+                boardOut >> putStrLn "Game Over! X has won" >> return 1
+            else if winStat == Owin then
+                boardOut >> putStrLn "Game Over! O has won" >> return 2
+            else if winStat == Draw then
+                boardOut >> putStrLn "Game Over! Its a draw" >> return 3
+            else boardOut >> return 4
+    where
+        reduceBoard:: [[SubBoard]] -> SubBoard -> Int -> [[WinStatus]]
+        reduceBoard sup sub 3 = []
+        reduceBoard sup sub i = (replaceRow (sup !! i) (sub !! i) 0) : (reduceBoard sup sub (i + 1))
+        replaceRow :: [SubBoard] -> [Cell] -> Int -> [WinStatus]
+        replaceRow sup row 3 = []
+        replaceRow sup (row1:row2) i =
+            let marker = getSubBoardWinStatus (sup !! i) in
+            do
+                if marker == Xwin 
+                    then
+                        Xwin: (replaceRow sup row2 (i + 1))
+                    else if marker == Owin then
+                        Owin : (replaceRow sup row2 (i + 1))
+					else if marker == Draw then
+                        Draw : (replaceRow sup row2 (i + 1))
+                    else NoneYet : (replaceRow sup row2 (i + 1))
+					
 
 --Testing Boards
 
@@ -121,6 +184,11 @@ subBoard18 = [[O, O, X],
             [X, X, O], 
             [O, X, O]]
 
+subBoard19 :: SubBoard
+subBoard19 = [[O, O, O], 
+            [X, O, X], 
+            [O, X, Empty]]
+
             
 emptysubBoard11 :: SubBoard
 emptysubBoard11 = [[Empty, Empty, Empty], 
@@ -137,6 +205,20 @@ superBoard12 = [[emptysubBoard11, subBoard16, subBoard15],
                [subBoard17, subBoard15, subBoard17], 
                [subBoard15, emptysubBoard11, subBoard18]]
 
+superBoardDraw :: SuperBoard
+superBoardDraw = [[subBoard18, subBoard18, subBoard18],
+				  [subBoard18, subBoard18, subBoard18],
+				  [subBoard18, subBoard18, subBoard18]]
+
+superBoardNonFillDraw :: SuperBoard
+superBoardNonFillDraw = [[subBoard15, subBoard19, subBoard15],
+				  [subBoard19, subBoard15, subBoard15],
+				  [subBoard19, subBoard15, subBoard19]]
+
+superBoard13 :: SuperBoard
+superBoard13 = [[subBoard15, subBoard16, subBoard15], 
+               [subBoard17, emptysubBoard11, subBoard17], 
+               [subBoard15, emptysubBoard11, subBoard18]]
 -- TESTs
 -- ghci> simplePlayer (State superBoard1 8 "X")
 --Action at board: 1
