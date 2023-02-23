@@ -1,6 +1,7 @@
 module TicTacToeFuncs where
 
 import TicTacToeTypes
+import DrawBoard
 
 -- check each row of sb for three-in-a-row of type c (win condition)
 checkCols :: SubBoard -> Cell -> Bool
@@ -40,6 +41,8 @@ getIndexedSubBoard spb index = ith whichCol (ith whichRow spb)
        ith 1 (h:t) = h
        ith n (h:t) = ith (n - 1) t
 
+
+
 -- returns list of valid actions on given superboard
 -- int represents activeboardindex, if negative it means a SuperBoardAction is needed
 getValidActions :: SuperBoard -> Integer -> [Action]
@@ -63,38 +66,76 @@ simplePlayer (State superBoard activesubboardindex symbol)
 -- first guard checks to see if active subboard is full or won, if not then computes an action on that subboard
 -- otherwise, computes an action that chooses a new subboard
 
+-- prints out current board
+-- figures out if someone has won. if yes, announce the victory. if no, keep playing
+-- using integers as return values as temporary placeholders
+processNewBoard :: SuperBoard -> IO Integer
+processNewBoard supboard =
+    let winStat = getSubBoardWinStatus (reduceBoard supboard emptySubBoard 0) in
+    do
+        let boardOut = terminalDrawSuperBoard supboard
+        if winStat == Xwin 
+            then
+                boardOut >> putStrLn "Game Over! X has won" >> return 1
+            else if winStat == Owin then
+                boardOut >> putStrLn "Game Over! O has won" >> return 2
+            else if winStat == Draw then
+                boardOut >> putStrLn "Game Over! Its a draw" >> return 3
+            else boardOut >> return 4
+    where
+        reduceBoard:: [[SubBoard]] -> SubBoard -> Int -> SubBoard
+        reduceBoard sup sub 3 = []
+        reduceBoard sup sub i = (replaceRow (sup !! i) (sub !! i) 0) : (reduceBoard sup sub (i + 1))
+        replaceRow :: [SubBoard] -> [Cell] -> Int -> [Cell]
+        replaceRow sup row 3 = []
+        replaceRow sup (row1:row2) i =
+            let marker = getSubBoardWinStatus (sup !! i) in
+            do
+                if marker == Xwin 
+                    then
+                        X : (replaceRow sup row2 (i + 1))
+                    else if marker == Owin then
+                        O : (replaceRow sup row2 (i + 1))
+                    else Empty : (replaceRow sup row2 (i + 1))
+
 
 -- current implementation does not use a negative activesubboardindex, checks to see if full or won
 
 --Testing Boards
 
-subBoard5 :: SubBoard
-subBoard5 = [[X, X, X], 
+subBoard15 :: SubBoard
+subBoard15 = [[X, X, X], 
             [X, O, X], 
             [O, X, Empty]]
-
-
-subBoard6 = [[O, X, X], 
+            
+            
+subBoard16 = [[O, X, X], 
             [X, Empty, X], 
             [Empty, X, Empty]]
-
-subBoard7 = [[X, X, O], 
+            
+subBoard17 = [[X, X, O], 
             [O, X, X], 
             [O, O, O]]
 
-subBoard8 = [[O, O, X], 
+subBoard18 = [[O, O, X], 
             [X, X, O], 
             [O, X, O]]
 
-emptySubBoard1 :: SubBoard
-emptySubBoard1 = [[Empty, Empty, Empty], 
+            
+emptysubBoard11 :: SubBoard
+emptysubBoard11 = [[Empty, Empty, Empty], 
                  [Empty, Empty, Empty], 
                  [Empty, Empty, Empty]]
 
-superBoard1 :: SuperBoard
-superBoard1 = [[emptySubBoard1, subBoard6, emptySubBoard1], 
-                [subBoard7, emptySubBoard, subBoard7], 
-                [subBoard8, emptySubBoard1, subBoard8]]
+superBoard11 :: SuperBoard
+superBoard11 = [[emptysubBoard11, subBoard16, emptysubBoard11], 
+               [subBoard17, emptysubBoard11, subBoard17], 
+               [subBoard18, emptysubBoard11, subBoard18]]
+
+superBoard12 :: SuperBoard
+superBoard12 = [[emptysubBoard11, subBoard16, subBoard15], 
+               [subBoard17, subBoard15, subBoard17], 
+               [subBoard15, emptysubBoard11, subBoard18]]
 
 -- TESTs
 -- ghci> simplePlayer (State superBoard1 8 "X")
