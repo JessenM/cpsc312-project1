@@ -42,6 +42,7 @@ type Player = State -> Action
 -- SuperBoardAction - choosing a subboard from the superboard (one of the 9), INDEX [0..8]
 data Action = SubBoardAction (Integer, Integer)
               |SuperBoardAction Integer
+    deriving Eq
 
 instance Show Action where
     show (SubBoardAction (coln, rown)) = "Action at: col: "++(show(coln+1))++" row: "++(show(rown+1)) -- use +1 because index starts at 0, but our GUI coordinates start at 1
