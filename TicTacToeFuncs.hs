@@ -55,8 +55,7 @@ simplePlayer :: Player
 -- very simple player
 -- if choosing subboard, it chooses the first board
 -- if choosing a cell on subboard, it chooses the first cell
--- if False, then a subBoard needs to be chose (comput superBoardAction)
--- if True, then a cell on subBoard needs to be choesen (compute subBoardAction)
+-- if activeSubBoard is full or won/draw then computes a superBoard action
 simplePlayer (State superBoard activesubboardindex symbol) 
 	| let activeSubBoard = getIndexedSubBoard superBoard (activesubboardindex+1), not (checkFull(activeSubBoard)) && ((getSubBoardWinStatus activeSubBoard) == NoneYet) = head(getValidActions superBoard activesubboardindex)
 	| otherwise = head(getValidActions superBoard (-1))
