@@ -52,7 +52,7 @@ instance Show Action where
 data Result = EndOfGame Double State
             |ContinueGame State
         deriving (Show, Eq)
-        
+
 -- the State is:
 -- The Superboard (contains the subboards, the available (empty) cells, and cells that have been filled (X, O))
 -- Integer that signifies which subBoard is playing played upon (1-9)

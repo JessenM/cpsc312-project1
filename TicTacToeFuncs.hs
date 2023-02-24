@@ -92,6 +92,61 @@ getValidActions superBoard activesubboardindex =
             [SubBoardAction (rem n 3,quot n 3)| (n, cell)<-(zip [0..] (concat activesubboard)), cell==Empty]
 
 
+
+start_state = (State startSuperBoard 4 "X")
+
+--assumes actions are valid!!! 
+ultimateTicTacToe :: Game
+-- updates game with superboardaction, changes activesubboard index (superBoardActions cant end games)
+-- symbols stays the same since game doesnt change turns when a superBoardAction is made
+ultimateTicTacToe (SuperBoardAction i) (State superBoard activeSubBoardIndex symbol) =
+    ContinueGame (State superBoard i symbol)
+
+-- updates game with subboardaction (if no one has won), if so then endgame
+ultimateTicTacToe (SubBoardAction (coln,rown)) (State superBoard activeSubBoardIndex symbol)
+    | currentGameStatus == Xwin = EndOfGame 1 start_state
+	| currentGameStatus == Owin = EndOfGame (-1) start_state
+	| currentGameStatus == Draw = EndOfGame 0 start_state
+	| otherwise = ContinueGame (State updatedSuperBoard updatedActiveSubBoardIndex updatedSymbol)
+	 where
+		updatedSuperBoard = getNewSuperBoard superBoard activeSubBoardIndex (makeNewCell(symbol)) (coln,rown)
+		updatedActiveSubBoardIndex = ((3*rown)+coln)
+		updatedSymbol = swapSymbol(symbol)
+		currentGameStatus = processNewBoard2 updatedSuperBoard
+
+
+--gets new supBoard according to activeSubBoardIndex, cell, coln, and rown.
+--asbi = activesubboardindex
+getNewSuperBoard :: SuperBoard -> Integer -> Cell -> (Integer, Integer) -> SuperBoard
+getNewSuperBoard superBoard asbi cell (coln, rown) 
+	| quot asbi 3 == 0 = [fillCellCol (superBoard!!0) asbi (coln,rown) cell, superBoard!!1, superBoard!!2] -- checks if asbi is in row 1
+	| quot asbi 3 == 1 = [superBoard!!0, fillCellCol (superBoard!!1)  asbi (coln,rown) cell, superBoard!!2] -- checks if asbi is in row 2
+	| otherwise = [superBoard!!0, superBoard!!1, fillCellCol (superBoard!!2) asbi (coln,rown) cell] -- checks if asbi is in row 3
+
+--given a row of subboards and activesubboardindex, it will figure out what column the board that needs to be filled is, and fill it
+fillCellCol :: [SubBoard] -> Integer -> (Integer,Integer) -> Cell -> [SubBoard]
+fillCellCol subBoards asbi (coln, rown) cell
+	| rem asbi 3 == 0 = [fillCell (subBoards!!0) cell (coln,rown), subBoards!!1, subBoards!!2] -- checks if asbi is in col 1, fills ifso
+	| rem asbi 3 == 1 = [subBoards!!0, fillCell (subBoards!!1) cell (coln,rown), subBoards!!2] -- checks if asbi is in col 2, fills ifso
+	| otherwise = [subBoards!!0, subBoards!!1, fillCell (subBoards!!2) cell (coln,rown)] -- checks if asbi is in col 3, fills ifso
+
+
+
+--swaps Symbols
+swapSymbol :: String -> String
+swapSymbol "X" = "O"
+swapSymbol "O" = "X"
+
+
+--makes new cell
+makeNewCell :: String -> Cell
+makeNewCell "X" = X
+makeNewCell "O" = O
+
+
+
+
+
 simplePlayer :: Player
 -- very simple player
 -- if choosing subboard, it chooses the first board
@@ -142,19 +197,10 @@ processNewBoard supboard =
 -- prints out current board
 -- figures out if someone has won. if yes, announce the victory. if no, keep playing
 -- using integers as return values as temporary placeholders
-processNewBoard2 :: SuperBoard -> IO Integer
+processNewBoard2 :: SuperBoard -> WinStatus
 processNewBoard2 supboard =
     let winStat = getSuperBoardWinStatus (reduceBoard supboard emptySubBoard 0) in
-    do
-        let boardOut = terminalDrawSuperBoard supboard
-        if winStat == Xwin 
-            then
-                boardOut >> putStrLn "Game Over! X has won" >> return 1
-            else if winStat == Owin then
-                boardOut >> putStrLn "Game Over! O has won" >> return 2
-            else if winStat == Draw then
-                boardOut >> putStrLn "Game Over! Its a draw" >> return 3
-            else boardOut >> return 4
+	winStat
     where
         reduceBoard:: [[SubBoard]] -> SubBoard -> Int -> [[WinStatus]]
         reduceBoard sup sub 3 = []
@@ -205,6 +251,10 @@ emptysubBoard11 = [[Empty, Empty, Empty],
                  [Empty, Empty, Empty], 
                  [Empty, Empty, Empty]]
 
+startSuperBoard :: SuperBoard
+startSuperBoard = [[emptysubBoard11, emptysubBoard11, emptysubBoard11],
+					[emptysubBoard11, emptysubBoard11, emptysubBoard11],
+					[emptysubBoard11, emptysubBoard11, emptysubBoard11]]
 superBoard11 :: SuperBoard
 superBoard11 = [[emptysubBoard11, subBoard16, emptysubBoard11], 
                [subBoard17, emptysubBoard11, subBoard17], 
@@ -229,6 +279,9 @@ superBoard13 :: SuperBoard
 superBoard13 = [[subBoard15, subBoard16, subBoard15], 
                [subBoard17, emptysubBoard11, subBoard17], 
                [subBoard15, emptysubBoard11, subBoard18]]
+			   
+			   
+			   
 -- TESTs
 -- ghci> simplePlayer (State superBoard1 8 "X")
 --Action at board: 1
