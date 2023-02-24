@@ -171,7 +171,8 @@ humanPlayer (State superBoard activesubboardindex symbol)
 -- if player must play in activesubboardindex
     | let activeSubBoard = getIndexedSubBoard superBoard (activesubboardindex+1),
         getSubBoardWinStatus activeSubBoard == NoneYet = humanMakeValidSubMove superBoard (fromIntegral activesubboardindex)
-    | otherwise = humanMakeValidSubMove superBoard (fromIntegral (humanMakeValidSuperMove superBoard))
+--    | otherwise = humanMakeValidSubMove superBoard (fromIntegral (humanMakeValidSuperMove superBoard))
+    | otherwise = humanMakeValidSuperAndSubMove superBoard
 
 humanMakeValidSubMove :: SuperBoard -> Int -> IO Action
 -- returns valid action from user (inputs a valid subboard, gets valid posiiton in subboard form user)
@@ -183,8 +184,9 @@ humanMakeValidSubMove sb index =
         let userInput = digitToInt (input !! 0)
         if (userInput >= 0) && (userInput < 9) && (subboard !! ((userInput) `mod` 3) !! (userInput `div` 3) == Empty)
         then return (SubBoardAction (toInteger index, toInteger userInput))
-        else do putStrLn "Error! not a valid move - try again" >> return (humanMakeValidSubMove sb index)
+        else do putStrLn "Error! not a valid move - try again" >> (humanMakeValidSubMove sb index)
 
+{-
 humanMakeValidSuperMove :: SuperBoard -> IO Integer
 --returns a valid subboard from user
 humanMakeValidSuperMove sb = do
@@ -194,6 +196,16 @@ humanMakeValidSuperMove sb = do
     if (userInput >= 0) && (userInput < 9) && (getSubBoardWinStatus (sb !! (userInput `mod` 3) !! (userInput `div` 3)) == NoneYet)
     then return (toInteger userInput)
     else humanMakeValidSuperMove sb
+    -}
+
+humanMakeValidSuperAndSubMove :: SuperBoard -> IO Action
+humanMakeValidSuperAndSubMove sb = do
+    putStrLn "which superboard would you like"
+    input <- getLine
+    let userInput = digitToInt (input !! 0)
+    if (userInput >= 0) && (userInput < 9) && (getSubBoardWinStatus (sb !! (userInput `mod` 3) !! (userInput `div` 3)) == NoneYet)
+    then humanMakeValidSubMove sb userInput
+    else humanMakeValidSuperAndSubMove sb
 
 -- prints out current board
 -- figures out if someone has won. if yes, announce the victory. if no, keep playing
