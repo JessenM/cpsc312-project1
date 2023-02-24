@@ -6,7 +6,7 @@ module Play where
 -- To run it, try:
 -- ghci
 -- :load Play
--- play ultimateTicTacToe (State emptySuperBoard 5 'X') simplePlayer (0,0,0)
+-- play ultimateTicTacToe start_state simplePlayer (0,0,0)
 
 import TicTacToeTypes
 import TicTacToeFuncs
@@ -42,32 +42,10 @@ person_play :: Game -> Result -> Player -> TournammentState -> IO TournammentSta
 --      multiple-input (main goal)
 person_play game (ContinueGame state) opponent ts =
    do
+      let State board _ _ = state
+      putStrLn ("Board: \n"++drawSuperBoard board)
       move <- humanPlayer state
       computer_play game (game move state) opponent ts
-   {-
-      let State board subn playerSymb = state
-      putStrLn ("Board: \n"++drawSuperBoard board)
-      let subb = getIndexedSubBoard board subn
---      if (getSubBoardWinStatus subb == NoneYet)
---        then
---           putStrLn ("Subboard: \n"++drawSubBoard subb++"\nChoose position")
---        else
---           putStrLn ("Default subboard outcome already decided; choose subboard ([1,9])")
-      let avail = getValidActions board 
-                                  (if (getSubBoardWinStatus subb == NoneYet) then subn else (-subn))
-      line <- getLine
-      case (readMaybe line :: Maybe Action) of
-        Nothing ->
-           person_play game (ContinueGame state) opponent ts
-        Just action ->
-           if (action `elem` avail)
-             then
-                computer_play game (game action state) opponent ts
-             else
-               do
-                putStrLn ("Illegal move: "++ show action)
-                person_play game (ContinueGame state) opponent ts
-                -}
 
 person_play game (EndOfGame val start_state) opponent ts =
   do
