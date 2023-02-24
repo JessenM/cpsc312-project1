@@ -194,7 +194,7 @@ humanMakeValidSubMove sb index =
         putStrLn ("where would you like to move on subboard " ++ show index)
         input <- getLine
         let userInput = digitToInt (input !! 0)
-        if (userInput >= 0) && (userInput < 9) && (subboard !! ((userInput) `mod` 3) !! (userInput `div` 3) == Empty)
+        if (userInput >= 0) && (userInput < 9) && (subboard !! ((userInput) `div` 3) !! (userInput `mod` 3) == Empty)
 --        then return (SubBoardAction (toInteger index, toInteger userInput))
         then return (SubBoardAction (toInteger ((userInput) `mod` 3), toInteger ((userInput) `div` 3)))
         else do putStrLn "Error! not a valid move - try again" >> (humanMakeValidSubMove sb index)
