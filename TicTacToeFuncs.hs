@@ -282,7 +282,9 @@ superBoard13 = [[subBoard15, subBoard16, subBoard15],
                [subBoard15, emptysubBoard11, subBoard18]]
 			   
 			   
-			   
+testGame = ultimateTicTacToe (SubBoardAction (1,2)) start_state
+testGame2 = ultimateTicTacToe (SuperBoardAction 1) start_state
+
 -- TESTs
 -- ghci> simplePlayer (State superBoard1 8 "X")
 --Action at board: 1
