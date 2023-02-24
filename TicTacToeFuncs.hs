@@ -2,6 +2,7 @@ module TicTacToeFuncs where
 
 import TicTacToeTypes
 import DrawBoard
+import Data.Char(digitToInt)
 
 -- check each row of sb for three-in-a-row of type c (win condition)
 checkCols :: SubBoard -> Cell -> Bool
@@ -106,30 +107,30 @@ ultimateTicTacToe (SuperBoardAction i) (State superBoard activeSubBoardIndex sym
 -- updates game with subboardaction (if no one has won), if so then endgame
 ultimateTicTacToe (SubBoardAction (coln,rown)) (State superBoard activeSubBoardIndex symbol)
     | currentGameStatus == Xwin = EndOfGame 1 start_state
-	| currentGameStatus == Owin = EndOfGame (-1) start_state
-	| currentGameStatus == Draw = EndOfGame 0 start_state
-	| otherwise = ContinueGame (State updatedSuperBoard updatedActiveSubBoardIndex updatedSymbol)
-	 where
-		updatedSuperBoard = getNewSuperBoard superBoard activeSubBoardIndex (makeNewCell(symbol)) (coln,rown)
-		updatedActiveSubBoardIndex = ((3*rown)+coln)
-		updatedSymbol = swapSymbol(symbol)
-		currentGameStatus = processNewBoard2 updatedSuperBoard
+    | currentGameStatus == Owin = EndOfGame (-1) start_state
+    | currentGameStatus == Draw = EndOfGame 0 start_state
+    | otherwise = ContinueGame (State updatedSuperBoard updatedActiveSubBoardIndex updatedSymbol)
+     where
+        updatedSuperBoard = getNewSuperBoard superBoard activeSubBoardIndex (makeNewCell(symbol)) (coln,rown)
+        updatedActiveSubBoardIndex = ((3*rown)+coln)
+        updatedSymbol = swapSymbol(symbol)
+        currentGameStatus = processNewBoard2 updatedSuperBoard
 
 
 --gets new supBoard according to activeSubBoardIndex, cell, coln, and rown.
 --asbi = activesubboardindex
 getNewSuperBoard :: SuperBoard -> Integer -> Cell -> (Integer, Integer) -> SuperBoard
 getNewSuperBoard superBoard asbi cell (coln, rown) 
-	| quot asbi 3 == 0 = [fillCellCol (superBoard!!0) asbi (coln,rown) cell, superBoard!!1, superBoard!!2] -- checks if asbi is in row 1
-	| quot asbi 3 == 1 = [superBoard!!0, fillCellCol (superBoard!!1)  asbi (coln,rown) cell, superBoard!!2] -- checks if asbi is in row 2
-	| otherwise = [superBoard!!0, superBoard!!1, fillCellCol (superBoard!!2) asbi (coln,rown) cell] -- checks if asbi is in row 3
+    | quot asbi 3 == 0 = [fillCellCol (superBoard!!0) asbi (coln,rown) cell, superBoard!!1, superBoard!!2] -- checks if asbi is in row 1
+    | quot asbi 3 == 1 = [superBoard!!0, fillCellCol (superBoard!!1)  asbi (coln,rown) cell, superBoard!!2] -- checks if asbi is in row 2
+    | otherwise = [superBoard!!0, superBoard!!1, fillCellCol (superBoard!!2) asbi (coln,rown) cell] -- checks if asbi is in row 3
 
 --given a row of subboards and activesubboardindex, it will figure out what column the board that needs to be filled is, and fill it
 fillCellCol :: [SubBoard] -> Integer -> (Integer,Integer) -> Cell -> [SubBoard]
 fillCellCol subBoards asbi (coln, rown) cell
-	| rem asbi 3 == 0 = [fillCell (subBoards!!0) cell (coln,rown), subBoards!!1, subBoards!!2] -- checks if asbi is in col 1, fills ifso
-	| rem asbi 3 == 1 = [subBoards!!0, fillCell (subBoards!!1) cell (coln,rown), subBoards!!2] -- checks if asbi is in col 2, fills ifso
-	| otherwise = [subBoards!!0, subBoards!!1, fillCell (subBoards!!2) cell (coln,rown)] -- checks if asbi is in col 3, fills ifso
+    | rem asbi 3 == 0 = [fillCell (subBoards!!0) cell (coln,rown), subBoards!!1, subBoards!!2] -- checks if asbi is in col 1, fills ifso
+    | rem asbi 3 == 1 = [subBoards!!0, fillCell (subBoards!!1) cell (coln,rown), subBoards!!2] -- checks if asbi is in col 2, fills ifso
+    | otherwise = [subBoards!!0, subBoards!!1, fillCell (subBoards!!2) cell (coln,rown)] -- checks if asbi is in col 3, fills ifso
 
 
 
@@ -162,6 +163,37 @@ simplePlayer (State superBoard activesubboardindex symbol)
 
 -- current implementation does not use a negative activesubboardindex, checks to see if full or won
 
+humanPlayer :: State -> IO Action
+-- player that grabs user input from human player
+-- figures out if player is forced to play on current subboard, gets valid position on subboard from user
+-- otherwise, gets valid superboard + subboard move from user
+humanPlayer (State superBoard activesubboardindex symbol)
+-- if player must play in activesubboardindex
+    | let activeSubBoard = getIndexedSubBoard superBoard (activesubboardindex+1),
+        getSubBoardWinStatus activeSubBoard == NoneYet = humanMakeValidSubMove superBoard (fromIntegral activesubboardindex)
+    | otherwise = humanMakeValidSubMove superBoard (fromIntegral (humanMakeValidSuperMove superBoard))
+
+humanMakeValidSubMove :: SuperBoard -> Int -> IO Action
+-- returns valid action from user (inputs a valid subboard, gets valid posiiton in subboard form user)
+humanMakeValidSubMove sb index = 
+    let subboard = sb !! (index `mod` 3) !! (index `div` 3) in
+    do
+        putStrLn ("where would you like to move on subboard " ++ show index)
+        input <- getLine
+        let userInput = digitToInt (input !! 0)
+        if (userInput >= 0) && (userInput < 9) && (subboard !! ((userInput) `mod` 3) !! (userInput `div` 3) == Empty)
+        then return (SubBoardAction (toInteger index, toInteger userInput))
+        else do putStrLn "Error! not a valid move - try again" >> return (humanMakeValidSubMove sb index)
+
+humanMakeValidSuperMove :: SuperBoard -> IO Integer
+--returns a valid subboard from user
+humanMakeValidSuperMove sb = do
+    putStrLn "which superboard would you like"
+    input <- getLine
+    let userInput = digitToInt (input !! 0)
+    if (userInput >= 0) && (userInput < 9) && (getSubBoardWinStatus (sb !! (userInput `mod` 3) !! (userInput `div` 3)) == NoneYet)
+    then return (toInteger userInput)
+    else humanMakeValidSuperMove sb
 
 -- prints out current board
 -- figures out if someone has won. if yes, announce the victory. if no, keep playing
@@ -201,7 +233,7 @@ processNewBoard supboard =
 processNewBoard2 :: SuperBoard -> WinStatus
 processNewBoard2 supboard =
     let winStat = getSuperBoardWinStatus (reduceBoard supboard emptySubBoard 0) in
-	winStat
+    winStat
     where
         reduceBoard:: [[SubBoard]] -> SubBoard -> Int -> [[WinStatus]]
         reduceBoard sup sub 3 = []
@@ -254,8 +286,8 @@ emptysubBoard11 = [[Empty, Empty, Empty],
 
 startSuperBoard :: SuperBoard
 startSuperBoard = [[emptysubBoard11, emptysubBoard11, emptysubBoard11],
-					[emptysubBoard11, emptysubBoard11, emptysubBoard11],
-					[emptysubBoard11, emptysubBoard11, emptysubBoard11]]
+                    [emptysubBoard11, emptysubBoard11, emptysubBoard11],
+                    [emptysubBoard11, emptysubBoard11, emptysubBoard11]]
 superBoard11 :: SuperBoard
 superBoard11 = [[emptysubBoard11, subBoard16, emptysubBoard11], 
                [subBoard17, emptysubBoard11, subBoard17], 
@@ -280,8 +312,8 @@ superBoard13 :: SuperBoard
 superBoard13 = [[subBoard15, subBoard16, subBoard15], 
                [subBoard17, emptysubBoard11, subBoard17], 
                [subBoard15, emptysubBoard11, subBoard18]]
-			   
-			   
+               
+               
 testGame = ultimateTicTacToe (SubBoardAction (1,2)) start_state
 testGame2 = ultimateTicTacToe (SuperBoardAction 1) start_state
 
