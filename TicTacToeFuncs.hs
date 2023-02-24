@@ -62,6 +62,7 @@ checkWinStatusDiags sb c = foldl (\ v an -> v || ((sb !! (2 * an) !! 0 == c) && 
 checkWinStatusFull :: [[WinStatus]] -> Bool
 checkWinStatusFull sb = foldl (\ v an -> v && (sb !! (an `mod` 3) !! (an `div` 3)) /= NoneYet) True [0..8]
 
+
 -- get subboard with given "index" (assumes index is in [1,9])
 getIndexedSubBoard :: SuperBoard -> Integer -> SubBoard
 getIndexedSubBoard spb index = ith whichCol (ith whichRow spb)
@@ -69,6 +70,17 @@ getIndexedSubBoard spb index = ith whichCol (ith whichRow spb)
        whichCol = mod (index - 1) 3 + 1
        ith 1 (h:t) = h
        ith n (h:t) = ith (n - 1) t
+
+{-
+-- get subboard with given "index" (assumes index is in [0,8])
+getIndexedSubBoard :: SuperBoard -> Integer -> SubBoard
+getIndexedSubBoard spb index = ith whichCol (ith whichRow spb)
+ where whichRow = div index 3
+       whichCol = mod index 3
+       ith 0 (h:t) = h
+       ith n (h:t) = ith (n - 1) t
+       -}
+
 
 -- insert given cell value into subboard at given coordinates (0-based indexing)
 fillCell :: SubBoard -> Cell -> (Integer, Integer) -> SubBoard
