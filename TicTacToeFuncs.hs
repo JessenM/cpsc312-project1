@@ -99,6 +99,7 @@ start_state = (State startSuperBoard 4 "X")
 ultimateTicTacToe :: Game
 -- updates game with superboardaction, changes activesubboard index (superBoardActions cant end games)
 -- symbols stays the same since game doesnt change turns when a superBoardAction is made
+--also uses 0-indexing on both the activeSubBoardIndex and coln,rown **IF CHANGE LATER REMEMBER TO CHANGE IN FUNCTION**
 ultimateTicTacToe (SuperBoardAction i) (State superBoard activeSubBoardIndex symbol) =
     ContinueGame (State superBoard i symbol)
 
