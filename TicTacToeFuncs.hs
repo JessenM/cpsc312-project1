@@ -199,6 +199,7 @@ humanMakeValidSuperMove sb = do
     -}
 
 humanMakeValidSuperAndSubMove :: SuperBoard -> IO Action
+-- returns valid action (choosing both superboard and subboard)
 humanMakeValidSuperAndSubMove sb = do
     putStrLn "which superboard would you like"
     input <- getLine
