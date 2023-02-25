@@ -196,7 +196,8 @@ humanMakeValidSubMove :: SuperBoard -> Int -> IO Action
 humanMakeValidSubMove sb index = 
     let subboard = sb !! (index `mod` 3) !! (index `div` 3) in
     do
-        putStrLn ("where would you like to move on subboard " ++ show index)
+        putStrLn ("Subboard " ++ show index ++ ": \n" ++ drawSubBoard subboard)
+        putStrLn ("where would you like to move on subboard " ++ show index ++"?")
         input <- getLine
         let userInput = digitToInt (input !! 0)
         if (userInput >= 0) && (userInput < 9) && (subboard !! ((userInput) `div` 3) !! (userInput `mod` 3) == Empty)
@@ -208,7 +209,7 @@ humanMakeValidSubMove sb index =
 humanMakeValidSuperMove :: SuperBoard -> IO Action
 --returns a valid subboard from user
 humanMakeValidSuperMove sb = do
-    putStrLn "which subboard would you like"
+    putStrLn "which subboard would you like?"
     input <- getLine
     let userInput = digitToInt (input !! 0)
     if (userInput >= 0) && (userInput < 9) && (getSubBoardWinStatus (sb !! (userInput `mod` 3) !! (userInput `div` 3)) == NoneYet)
