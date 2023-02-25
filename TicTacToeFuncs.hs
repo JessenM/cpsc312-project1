@@ -219,7 +219,7 @@ humanMakeValidSuperAndSubMove sb = do
     let userInput = digitToInt (input !! 0)
     if (userInput >= 0) && (userInput < 9) && (getSubBoardWinStatus (sb !! (userInput `mod` 3) !! (userInput `div` 3)) == NoneYet)
     then humanMakeValidSubMove sb userInput
-    else humanMakeValidSuperAndSubMove sb
+    else do putStrLn "Error! not a valid move - try again" >> (humanMakeValidSuperAndSubMove sb)
 
 -- prints out current board
 -- figures out if someone has won. if yes, announce the victory. if no, keep playing
