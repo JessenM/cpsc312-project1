@@ -186,15 +186,16 @@ humanPlayer :: State -> IO Action
 humanPlayer (State superBoard activesubboardindex symbol)
 -- if player must play in activesubboardindex
     | let activeSubBoard = getIndexedSubBoard superBoard (activesubboardindex+1),
-        getSubBoardWinStatus activeSubBoard == NoneYet = humanMakeValidSubMove superBoard (fromIntegral activesubboardindex)
+        getSubBoardWinStatus activeSubBoard == NoneYet = humanMakeValidSubMove superBoard activesubboardindex
 --    | otherwise = humanMakeValidSubMove superBoard (fromIntegral (humanMakeValidSuperMove superBoard))
 --    | otherwise = humanMakeValidSuperAndSubMove superBoard
     | otherwise = humanMakeValidSuperMove superBoard
 
-humanMakeValidSubMove :: SuperBoard -> Int -> IO Action
+humanMakeValidSubMove :: SuperBoard -> Integer -> IO Action
 -- returns valid action from user (inputs a valid subboard, gets valid posiiton in subboard form user)
 humanMakeValidSubMove sb index = 
-    let subboard = sb !! (index `mod` 3) !! (index `div` 3) in
+--    let subboard = sb !! (index `mod` 3) !! (index `div` 3) in
+    let subboard = getIndexedSubBoard sb (index + 1) in
     do
         putStrLn ("Subboard " ++ show index ++ ": \n" ++ drawSubBoard subboard)
         putStrLn ("where would you like to move on subboard " ++ show index ++"?")
