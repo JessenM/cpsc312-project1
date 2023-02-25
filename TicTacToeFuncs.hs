@@ -62,6 +62,10 @@ checkWinStatusDiags sb c = foldl (\ v an -> v || ((sb !! (2 * an) !! 0 == c) && 
 checkWinStatusFull :: [[WinStatus]] -> Bool
 checkWinStatusFull sb = foldl (\ v an -> v && (sb !! (an `mod` 3) !! (an `div` 3)) /= NoneYet) True [0..8]
 
+-- return whether action is SuperBoardAction
+isSuperBoardAction :: Action -> Bool
+isSuperBoardAction (SuperBoardAction _) = True
+isSuperBoardAction a = False
 
 -- get subboard with given "index" (assumes index is in [1,9])
 getIndexedSubBoard :: SuperBoard -> Integer -> SubBoard
@@ -184,7 +188,8 @@ humanPlayer (State superBoard activesubboardindex symbol)
     | let activeSubBoard = getIndexedSubBoard superBoard (activesubboardindex+1),
         getSubBoardWinStatus activeSubBoard == NoneYet = humanMakeValidSubMove superBoard (fromIntegral activesubboardindex)
 --    | otherwise = humanMakeValidSubMove superBoard (fromIntegral (humanMakeValidSuperMove superBoard))
-    | otherwise = humanMakeValidSuperAndSubMove superBoard
+--    | otherwise = humanMakeValidSuperAndSubMove superBoard
+    | otherwise = humanMakeValidSuperMove superBoard
 
 humanMakeValidSubMove :: SuperBoard -> Int -> IO Action
 -- returns valid action from user (inputs a valid subboard, gets valid posiiton in subboard form user)
@@ -199,18 +204,18 @@ humanMakeValidSubMove sb index =
         then return (SubBoardAction (toInteger ((userInput) `mod` 3), toInteger ((userInput) `div` 3)))
         else do putStrLn "Error! not a valid move - try again" >> (humanMakeValidSubMove sb index)
 
-{-
-humanMakeValidSuperMove :: SuperBoard -> IO Integer
+
+humanMakeValidSuperMove :: SuperBoard -> IO Action
 --returns a valid subboard from user
 humanMakeValidSuperMove sb = do
-    putStrLn "which superboard would you like"
+    putStrLn "which subboard would you like"
     input <- getLine
     let userInput = digitToInt (input !! 0)
     if (userInput >= 0) && (userInput < 9) && (getSubBoardWinStatus (sb !! (userInput `mod` 3) !! (userInput `div` 3)) == NoneYet)
-    then return (toInteger userInput)
-    else humanMakeValidSuperMove sb
-    -}
-
+    then return (SuperBoardAction (toInteger userInput))
+    else do putStrLn "Error! not a valid move - try again" >> (humanMakeValidSuperMove sb)
+    
+{-
 humanMakeValidSuperAndSubMove :: SuperBoard -> IO Action
 -- returns valid action (choosing both superboard and subboard)
 humanMakeValidSuperAndSubMove sb = do
@@ -220,6 +225,7 @@ humanMakeValidSuperAndSubMove sb = do
     if (userInput >= 0) && (userInput < 9) && (getSubBoardWinStatus (sb !! (userInput `mod` 3) !! (userInput `div` 3)) == NoneYet)
     then humanMakeValidSubMove sb userInput
     else do putStrLn "Error! not a valid move - try again" >> (humanMakeValidSuperAndSubMove sb)
+-}
 
 -- prints out current board
 -- figures out if someone has won. if yes, announce the victory. if no, keep playing

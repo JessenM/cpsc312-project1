@@ -45,7 +45,9 @@ person_play game (ContinueGame state) opponent ts =
       let State board _ _ = state
       putStrLn ("Board: \n"++drawSuperBoard board)
       move <- humanPlayer state
-      computer_play game (game move state) opponent ts
+      if (isSuperBoardAction move)
+        then person_play game (game move state) opponent ts
+        else computer_play game (game move state) opponent ts
 
 person_play game (EndOfGame val start_state) opponent ts =
   do
@@ -66,7 +68,9 @@ computer_play game (ContinueGame state) opponent ts =
         in
           do
             putStrLn ("The computer chose "++show opponent_move)
-            person_play game (game opponent_move state) opponent ts
+            if (isSuperBoardAction opponent_move)
+              then computer_play game (game opponent_move state) opponent ts
+              else person_play game (game opponent_move state) opponent ts
 
 update_tournament_state:: Double -> TournammentState -> IO TournammentState
 -- given value to the person, the tournament state, return the new tournament state
