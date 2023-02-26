@@ -35,7 +35,8 @@ play game start_state opponent ts =
         then
             person_play game (ContinueGame start_state) opponent ts
         else if line ==  "1"
-             then computer_play game (ContinueGame start_state) opponent ts
+            then let (State board subn _) = start_state
+                 in computer_play game (ContinueGame (State board subn "O")) opponent ts
         else if line == "2"
             then return ts
         else play game start_state opponent ts
