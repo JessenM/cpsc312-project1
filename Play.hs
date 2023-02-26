@@ -31,21 +31,15 @@ play game start_state opponent ts =
       putStrLn (game_Directions++"\n \n \n"++"Tournament results: "++ show wins++ " wins "++show losses++" losses "++show ties++" ties")
       putStrLn "Who starts? 0=you, 1=computer, 2=exit."
       line <- getLine
-      if line == "0"
-        then
-            person_play game (ContinueGame start_state) opponent ts
-        else if line ==  "1"
-            then let (State board subn _) = start_state
-                 in computer_play game (ContinueGame (State board subn "O")) opponent ts
-        else if line == "2"
-            then return ts
-        else play game start_state opponent ts
+      case line of "0" -> person_play game (ContinueGame start_state) opponent ts
+                   "1" -> let (State board subn _) = start_state
+                          in computer_play game (ContinueGame (State board subn "O")) opponent ts
+                   "2" -> return ts
+                   n   -> play game start_state opponent ts
 
 person_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
 -- opponent has played, the person must now play
 
--- TODO requires adaptation
---      multiple-input (main goal)
 person_play game (ContinueGame state) opponent ts =
    do
       let State board _ _ = state
