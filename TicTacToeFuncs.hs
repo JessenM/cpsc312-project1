@@ -67,6 +67,7 @@ isSuperBoardAction :: Action -> Bool
 isSuperBoardAction (SuperBoardAction _) = True
 isSuperBoardAction a = False
 
+{-
 -- get subboard with given "index" (assumes index is in [1,9])
 getIndexedSubBoard :: Integral a => SuperBoard -> a -> SubBoard
 getIndexedSubBoard spb index = ith whichCol (ith whichRow spb)
@@ -74,8 +75,8 @@ getIndexedSubBoard spb index = ith whichCol (ith whichRow spb)
        whichCol = mod (index - 1) 3 + 1
        ith 1 (h:t) = h
        ith n (h:t) = ith (n - 1) t
+-}
 
-{-
 -- get subboard with given "index" (assumes index is in [0,8])
 getIndexedSubBoard :: Integral a => SuperBoard -> a -> SubBoard
 getIndexedSubBoard spb index = ith whichCol (ith whichRow spb)
@@ -83,7 +84,6 @@ getIndexedSubBoard spb index = ith whichCol (ith whichRow spb)
        whichCol = mod index 3
        ith 0 (h:t) = h
        ith n (h:t) = ith (n - 1) t
-       -}
 
 
 -- insert given cell value into subboard at given coordinates (0-based indexing)
@@ -105,7 +105,7 @@ getValidActions superBoard activesubboardindex =
     if activesubboardindex < 0 then
         [SuperBoardAction i | (i,subboard)<-(zip [0..] (concat superBoard)), (getSubBoardWinStatus subboard == NoneYet)]
     else
-        let activesubboard = (getIndexedSubBoard superBoard (activesubboardindex+1)) in
+        let activesubboard = (getIndexedSubBoard superBoard activesubboardindex) in
             [SubBoardAction (rem n 3,quot n 3)| (n, cell)<-(zip [0..] (concat activesubboard)), cell==Empty]
 
 
@@ -171,7 +171,7 @@ simplePlayer :: Player
 -- if choosing a cell on subboard, it chooses the first cell
 -- if activeSubBoard is full or won/draw then computes a superBoard action
 simplePlayer (State superBoard activesubboardindex symbol) 
-    | let activeSubBoard = getIndexedSubBoard superBoard (activesubboardindex+1), not (checkFull(activeSubBoard)) && ((getSubBoardWinStatus activeSubBoard) == NoneYet) = head(getValidActions superBoard activesubboardindex)
+    | let activeSubBoard = getIndexedSubBoard superBoard activesubboardindex, not (checkFull(activeSubBoard)) && ((getSubBoardWinStatus activeSubBoard) == NoneYet) = head(getValidActions superBoard activesubboardindex)
     | otherwise = head(getValidActions superBoard (-1))
 
 -- first guard checks to see if active subboard is full or won, if not then computes an action on that subboard
@@ -185,7 +185,7 @@ humanPlayer :: State -> IO Action
 -- otherwise, gets valid superboard + subboard move from user
 humanPlayer (State superBoard activesubboardindex symbol)
 -- if player must play in activesubboardindex
-    | let activeSubBoard = getIndexedSubBoard superBoard (activesubboardindex+1),
+    | let activeSubBoard = getIndexedSubBoard superBoard activesubboardindex,
         getSubBoardWinStatus activeSubBoard == NoneYet = humanMakeValidSubMove superBoard activesubboardindex
 --    | otherwise = humanMakeValidSubMove superBoard (fromIntegral (humanMakeValidSuperMove superBoard))
 --    | otherwise = humanMakeValidSuperAndSubMove superBoard
@@ -195,7 +195,7 @@ humanMakeValidSubMove :: SuperBoard -> Integer -> IO Action
 -- returns valid action from user (inputs a valid subboard, gets valid posiiton in subboard form user)
 humanMakeValidSubMove sb index = 
 --    let subboard = sb !! (index `mod` 3) !! (index `div` 3) in
-    let subboard = getIndexedSubBoard sb (index + 1) in
+    let subboard = getIndexedSubBoard sb index in
     do
         putStrLn ("Subboard " ++ show index ++ ": \n" ++ drawSubBoard subboard)
         putStrLn ("where would you like to move on subboard " ++ show index ++"?")
@@ -212,7 +212,7 @@ humanMakeValidSuperMove sb = do
     putStrLn "which subboard would you like?"
     input <- getLine
     let userInput = digitToInt (input!! 0)
-    if (length input == 1) && (userInput >= 0) && (userInput < 9) && (getSubBoardWinStatus (getIndexedSubBoard sb (userInput + 1)) == NoneYet) && (length(input) < 2)
+    if (length input == 1) && (userInput >= 0) && (userInput < 9) && (getSubBoardWinStatus (getIndexedSubBoard sb userInput) == NoneYet) && (length(input) < 2)
     then return (SuperBoardAction (toInteger userInput))
     else do putStrLn "Error! not a valid move - try again" >> (humanMakeValidSuperMove sb)
     
