@@ -18,6 +18,8 @@ import Data.List
 
 type TournammentState = (Int,Int,Int)   -- wins, losses, ties
 
+go = play ultimateTicTacToe start_state simplePlayer (0,0,0)
+
 
 play :: Game -> State -> Player -> TournammentState -> IO TournammentState
 
