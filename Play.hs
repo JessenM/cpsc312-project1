@@ -7,6 +7,8 @@ module Play where
 -- ghci
 -- :load Play
 -- play ultimateTicTacToe start_state simplePlayer (0,0,0)
+-- or
+-- play ultimateTicTacToe start_state betterPlayer (0,0,0)
 
 import TicTacToeTypes
 import TicTacToeFuncs

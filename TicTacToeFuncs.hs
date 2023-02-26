@@ -173,6 +173,25 @@ simplePlayer :: Player
 simplePlayer (State superBoard activesubboardindex symbol) 
     | let activeSubBoard = getIndexedSubBoard superBoard activesubboardindex, not (checkFull(activeSubBoard)) && ((getSubBoardWinStatus activeSubBoard) == NoneYet) = head(getValidActions superBoard activesubboardindex)
     | otherwise = head(getValidActions superBoard (-1))
+	
+betterPlayer :: Player
+-- a better player
+-- if choosing subboard, it chooses the first board available
+-- if choosing a cell on subboard, it checks if their is a valid move that wins, if not, chooses last cell available
+-- if activeSubBoard is full or won/draw then computes a superBoard action
+betterPlayer (State superBoard activesubboardindex symbol)
+	| let activeSubBoard = getIndexedSubBoard superBoard activesubboardindex, not (checkFull(activeSubBoard)) && ((getSubBoardWinStatus activeSubBoard) == NoneYet) = getBetterMove(getValidActions superBoard activesubboardindex) (makeNewCell(symbol)) activeSubBoard
+	| otherwise = head(getValidActions superBoard (-1))
+
+--takes list of subboard actions and checks to see if any of them are winners (for computer), if not return last action
+getBetterMove :: [Action] -> Cell -> SubBoard -> Action
+getBetterMove ((SubBoardAction (n,m)):t) c sb =
+	if getSubBoardWinStatus(fillCell sb c (n,m)) == Owin || length(t) == 0 then
+		SubBoardAction (n,m)
+	else if length(t) == 1 then
+		t!!0
+	else
+		getBetterMove t c sb
 
 -- first guard checks to see if active subboard is full or won, if not then computes an action on that subboard
 -- otherwise, computes an action that chooses a new subboard
