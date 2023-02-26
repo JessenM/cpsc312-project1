@@ -68,7 +68,7 @@ isSuperBoardAction (SuperBoardAction _) = True
 isSuperBoardAction a = False
 
 -- get subboard with given "index" (assumes index is in [1,9])
-getIndexedSubBoard :: SuperBoard -> Integer -> SubBoard
+getIndexedSubBoard :: Integral a => SuperBoard -> a -> SubBoard
 getIndexedSubBoard spb index = ith whichCol (ith whichRow spb)
  where whichRow = div (index - 1) 3 + 1
        whichCol = mod (index - 1) 3 + 1
@@ -77,7 +77,7 @@ getIndexedSubBoard spb index = ith whichCol (ith whichRow spb)
 
 {-
 -- get subboard with given "index" (assumes index is in [0,8])
-getIndexedSubBoard :: SuperBoard -> Integer -> SubBoard
+getIndexedSubBoard :: Integral a => SuperBoard -> a -> SubBoard
 getIndexedSubBoard spb index = ith whichCol (ith whichRow spb)
  where whichRow = div index 3
        whichCol = mod index 3
@@ -202,7 +202,6 @@ humanMakeValidSubMove sb index =
         input <- getLine
         let userInput = digitToInt (input !! 0)
         if (length input == 1) && (userInput >= 0) && (userInput < 9) && (subboard !! ((userInput) `div` 3) !! (userInput `mod` 3) == Empty)
---        then return (SubBoardAction (toInteger index, toInteger userInput))
         then return (SubBoardAction (toInteger ((userInput) `mod` 3), toInteger ((userInput) `div` 3)))
         else do putStrLn "Error! not a valid move - try again" >> (humanMakeValidSubMove sb index)
 
@@ -213,7 +212,7 @@ humanMakeValidSuperMove sb = do
     putStrLn "which subboard would you like?"
     input <- getLine
     let userInput = digitToInt (input!! 0)
-    if (length input == 1) && (userInput >= 0) && (userInput < 9) && (getSubBoardWinStatus (sb !! (userInput `mod` 3) !! (userInput `div` 3)) == NoneYet) && (length(input) < 2)
+    if (length input == 1) && (userInput >= 0) && (userInput < 9) && (getSubBoardWinStatus (getIndexedSubBoard sb (userInput + 1)) == NoneYet) && (length(input) < 2)
     then return (SuperBoardAction (toInteger userInput))
     else do putStrLn "Error! not a valid move - try again" >> (humanMakeValidSuperMove sb)
     
