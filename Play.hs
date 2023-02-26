@@ -52,7 +52,7 @@ person_play game (ContinueGame state) opponent ts =
 
 person_play game (EndOfGame val start_state) opponent ts =
   do
-    newts <- update_tournament_state (-val) ts  -- val is value to computer; -val is value for person
+    newts <- update_tournament_state val ts  -- val is from X player's point of view
     play game start_state opponent newts
 
 computer_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
@@ -74,7 +74,7 @@ computer_play game (ContinueGame state) opponent ts =
               else person_play game (game opponent_move state) opponent ts
 
 pass_and_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
--- turn of human player with human opponent
+-- turn of human player with human opponent (computer Player present to be passed to play at end of game)
 
 pass_and_play game (ContinueGame state) opponent ts =
    do
@@ -87,7 +87,7 @@ pass_and_play game (ContinueGame state) opponent ts =
 pass_and_play game (EndOfGame val start_state) opponent ts =
   do
     let State _ _ symb = start_state
-    newts <- update_tournament_state (if (symb == "X") then (-val) else val) ts -- want val according to X
+    newts <- update_tournament_state val ts
     play game start_state opponent newts
 
 update_tournament_state:: Double -> TournammentState -> IO TournammentState
