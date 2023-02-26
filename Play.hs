@@ -29,12 +29,13 @@ play game start_state opponent ts =
   let (wins, losses,ties) = ts in
   do
       putStrLn (game_Directions++"\n \n \n"++"Tournament results: "++ show wins++ " wins "++show losses++" losses "++show ties++" ties")
-      putStrLn "Who starts? 0=you, 1=computer, 2=exit."
+      putStrLn "Who starts? 0=you, 1=computer, 2=exit, 3=pass-and-play."
       line <- getLine
       case line of "0" -> person_play game (ContinueGame start_state) opponent ts
                    "1" -> let (State board subn _) = start_state
                           in computer_play game (ContinueGame (State board subn "O")) opponent ts
                    "2" -> return ts
+                   "3" -> pass_and_play game (ContinueGame start_state) opponent ts
                    n   -> play game start_state opponent ts
 
 person_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
@@ -71,6 +72,23 @@ computer_play game (ContinueGame state) opponent ts =
             if (isSuperBoardAction opponent_move)
               then computer_play game (game opponent_move state) opponent ts
               else person_play game (game opponent_move state) opponent ts
+
+pass_and_play :: Game -> Result -> Player -> TournammentState -> IO TournammentState
+-- turn of human player with human opponent
+
+pass_and_play game (ContinueGame state) opponent ts =
+   do
+      let State board _ symb = state
+      putStrLn ("Board: \n"++drawSuperBoard board)
+      putStrLn ("Player "++symb++":")
+      move <- humanPlayer state
+      pass_and_play game (game move state) opponent ts
+
+pass_and_play game (EndOfGame val start_state) opponent ts =
+  do
+    let State _ _ symb = start_state
+    newts <- update_tournament_state (if (symb == "X") then (-val) else val) ts -- want val according to X
+    play game start_state opponent newts
 
 update_tournament_state:: Double -> TournammentState -> IO TournammentState
 -- given value to the person, the tournament state, return the new tournament state
