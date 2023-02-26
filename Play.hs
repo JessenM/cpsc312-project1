@@ -14,16 +14,19 @@ import DrawBoard
 
 import System.IO
 import Text.Read   (readMaybe)
+import Data.List
 
 type TournammentState = (Int,Int,Int)   -- wins, losses, ties
 
 
 play :: Game -> State -> Player -> TournammentState -> IO TournammentState
 
+game_Directions = "\n Welcome to Ultimate Tic-Tac-Toe! \n Your inputs on the board are as such: \n "++(intercalate ("\n"++" ---+---+--"++"\n") ["0 | 1 | 2 ", " 3 | 4 | 5 ", " 6 | 7 | 8 "])
+
 play game start_state opponent ts =
   let (wins, losses,ties) = ts in
   do
-      putStrLn ("Tournament results: "++ show wins++ " wins "++show losses++" losses "++show ties++" ties")
+      putStrLn (game_Directions++"\n \n \n"++"Tournament results: "++ show wins++ " wins "++show losses++" losses "++show ties++" ties")
       putStrLn "Who starts? 0=you, 1=computer, 2=exit."
       line <- getLine
       if line == "0"
