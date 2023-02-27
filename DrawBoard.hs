@@ -42,7 +42,7 @@ drawSubBoard b =
     where
         boardSize = length (head b)--we know the subBoards are always 3x3, but this makes sure
         boardTop = "  "++(intercalate  "   " (strToChars (take boardSize ['1'..]))) -- top part of the board, with column labels 1 2 3
-        betweenRow = "\n"++" ---+---+--"++"\n" -- what appears between the rows
+        betweenRow = "\n"++" ---+---+---"++"\n" -- what appears between the rows
         makeStrRows = intercalate " | " . map cellToChar --converts row of cells to row of chars with seperation
         boardSide str = [(show n)++" "++row| n <- [0..(boardSize-1)], row<-[str!!n]] -- takes a str row and adds index to front of it
 
