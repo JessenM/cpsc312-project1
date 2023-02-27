@@ -188,7 +188,7 @@ betterPlayer (State superBoard activesubboardindex symbol)
     | let activeSubBoard = getIndexedSubBoard superBoard activesubboardindex, not (checkFull(activeSubBoard)) && ((getSubBoardWinStatus activeSubBoard) == NoneYet) = getBetterMove(getValidActions superBoard activesubboardindex) (makeNewCell(symbol)) activeSubBoard
     | otherwise = head(getValidActions superBoard (-1))
 
---takes list of subboard actions and checks to see if any of them are winners (for computer), if not return last action
+--takes list of subboard actions and returns the best move, according to compareMoves
 getBetterMove :: [Action] -> Cell -> SubBoard -> Action
 getBetterMove ((SubBoardAction (n,m)):t) c sb =
     {-if getSubBoardWinStatus(fillCell sb c (n,m)) == Owin || length(t) == 0 then
@@ -199,6 +199,12 @@ getBetterMove ((SubBoardAction (n,m)):t) c sb =
         getBetterMove t c sb-}
     compareMoves (SubBoardAction (n,m)) t c sb
 
+-- takes an action, list of actions, cell and subboard and determine the best move based on:
+-- if the player can win, take that move
+-- else if player can't prevent the opponent from winning, take that action
+-- else if the center square is available, take it
+-- else if a corner square is available, take it
+-- else do the last move in the list
 compareMoves :: Action -> [Action] -> Cell -> SubBoard -> Action
 compareMoves (SubBoardAction (n1,m1)) [] _ _ = SubBoardAction (n1,m1)
 compareMoves (SubBoardAction (n1,m1)) ((SubBoardAction (n2,m2)):t) c sb =
