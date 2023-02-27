@@ -155,6 +155,11 @@ swapSymbol :: String -> String
 swapSymbol "X" = "O"
 swapSymbol "O" = "X"
 
+--swaps Cells
+swapCells :: Cell -> Cell
+swapCells X = O
+swapCells O = X
+
 
 --makes new cell
 makeNewCell :: String -> Cell
@@ -173,25 +178,52 @@ simplePlayer :: Player
 simplePlayer (State superBoard activesubboardindex symbol) 
     | let activeSubBoard = getIndexedSubBoard superBoard activesubboardindex, not (checkFull(activeSubBoard)) && ((getSubBoardWinStatus activeSubBoard) == NoneYet) = head(getValidActions superBoard activesubboardindex)
     | otherwise = head(getValidActions superBoard (-1))
-	
+    
 betterPlayer :: Player
 -- a better player
 -- if choosing subboard, it chooses the first board available
 -- if choosing a cell on subboard, it checks if their is a valid move that wins, if not, chooses last cell available
 -- if activeSubBoard is full or won/draw then computes a superBoard action
 betterPlayer (State superBoard activesubboardindex symbol)
-	| let activeSubBoard = getIndexedSubBoard superBoard activesubboardindex, not (checkFull(activeSubBoard)) && ((getSubBoardWinStatus activeSubBoard) == NoneYet) = getBetterMove(getValidActions superBoard activesubboardindex) (makeNewCell(symbol)) activeSubBoard
-	| otherwise = head(getValidActions superBoard (-1))
+    | let activeSubBoard = getIndexedSubBoard superBoard activesubboardindex, not (checkFull(activeSubBoard)) && ((getSubBoardWinStatus activeSubBoard) == NoneYet) = getBetterMove(getValidActions superBoard activesubboardindex) (makeNewCell(symbol)) activeSubBoard
+    | otherwise = head(getValidActions superBoard (-1))
 
 --takes list of subboard actions and checks to see if any of them are winners (for computer), if not return last action
 getBetterMove :: [Action] -> Cell -> SubBoard -> Action
 getBetterMove ((SubBoardAction (n,m)):t) c sb =
-	if getSubBoardWinStatus(fillCell sb c (n,m)) == Owin || length(t) == 0 then
-		SubBoardAction (n,m)
-	else if length(t) == 1 then
-		t!!0
-	else
-		getBetterMove t c sb
+    {-if getSubBoardWinStatus(fillCell sb c (n,m)) == Owin || length(t) == 0 then
+        SubBoardAction (n,m)
+    else if length(t) == 1 then
+        t!!0
+    else
+        getBetterMove t c sb-}
+    compareMoves (SubBoardAction (n,m)) t c sb
+
+compareMoves :: Action -> [Action] -> Cell -> SubBoard -> Action
+compareMoves (SubBoardAction (n1,m1)) [] _ _ = SubBoardAction (n1,m1)
+compareMoves (SubBoardAction (n1,m1)) ((SubBoardAction (n2,m2)):t) c sb =
+    --check if move can win. if it can, then return that win (no need to do recursion to find better move)
+    if getSubBoardWinStatus(fillCell sb c (n1,m1)) == Owin then
+        SubBoardAction (n1,m1)
+    else if getSubBoardWinStatus(fillCell sb c (n2,m2)) == Owin then
+        SubBoardAction (n2,m2)
+    -- check if move can block opponent from winning
+    else if getSubBoardWinStatus(fillCell sb (swapCells c) (n1,m1)) == Xwin then
+        compareMoves (SubBoardAction (n1,m1)) t c sb
+    else if getSubBoardWinStatus(fillCell sb (swapCells c) (n2,m2)) == Xwin then
+        compareMoves (SubBoardAction (n2,m2)) t c sb
+    -- check if can call dibs on the center square (center is best as it can be part of 4 victories)
+    else if (n1 == 1) && (m1 == 1) then
+        compareMoves (SubBoardAction (n1,m1)) t c sb
+    else if (n2 == 1) && (m2 == 1) then
+        compareMoves (SubBoardAction (n2,m2)) t c sb
+    -- check if can call dibs on a corner (corner is good as it can be part of 3 victories)
+    else if (n1 /= 1) && (m1 /= 1) then
+        compareMoves (SubBoardAction (n1,m1)) t c sb
+    else if (n2 == 1) && (m2 == 1) then
+        compareMoves (SubBoardAction (n2,m2)) t c sb
+    -- default, check the next two moves
+    else compareMoves (SubBoardAction (n2,m2)) t c sb
 
 -- first guard checks to see if active subboard is full or won, if not then computes an action on that subboard
 -- otherwise, computes an action that chooses a new subboard
