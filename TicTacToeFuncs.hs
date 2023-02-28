@@ -394,7 +394,7 @@ superBoardDraw = [[subBoard18, subBoard18, subBoard18],
                   [subBoard18, subBoard18, subBoard18]]
 
 superBoardNonFillDraw :: SuperBoard
-superBoardNonFillDraw = [[subBoard15, subBoard19, subBoard15],
+superBoardNonFillDraw = [[emptysubBoard11, subBoard19, subBoard15],
                   [subBoard19, subBoard15, subBoard15],
                   [subBoard19, subBoard15, subBoard19]]
 

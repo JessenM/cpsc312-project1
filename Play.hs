@@ -21,8 +21,13 @@ import Data.List
 type TournammentState = (Int,Int,Int)   -- wins, losses, ties
 
 go = play ultimateTicTacToe start_state simplePlayer (0,0,0)
+go2 = play ultimateTicTacToe (State superBoardNonFillDraw2 4 "X") betterPlayer (0,0,0)
 
-
+superBoardNonFillDraw2 :: SuperBoard
+superBoardNonFillDraw2 = [[emptysubBoard11, subBoard19, subBoard15],
+                  [subBoard19, subBoard15, subBoard15],
+                  [subBoard19, subBoard15, subBoard19]]
+		
 play :: Game -> State -> Player -> TournammentState -> IO TournammentState
 
 game_Directions = "\n Welcome to Ultimate Tic-Tac-Toe! \n Your inputs on the board are as such: \n"++(intercalate ("\n"++"---+---+---"++"\n") [" 0 | 1 | 2 ", " 3 | 4 | 5 ", " 6 | 7 | 8 "])
